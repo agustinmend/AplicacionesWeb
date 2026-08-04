@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Portafolio profesional de Desarrollo de Software">
+    <title>Portafolio Web | Desarrollador de Software</title>
+    <link rel="stylesheet" href="index.css">
+    <script src="index.js" defer></script>
+</head>
+<body>
+
+    <header class="header">
+        <div class="header__logo">
+            <!-- Texto o imagen del logo -->
+            <span>DevPortfolio</span>
+        </div>
+        <button class="header__toggle toggle-btn" aria-expanded="false" aria-controls="main-nav" aria-label="Abrir menú">
+            <span class="toggle-btn__line"></span>
+            <span class="toggle-btn__line"></span>
+            <span class="toggle-btn__line"></span>
+        </button>
+        <nav class="header__nav nav">
+            <ul class="nav__list">
+                <li class="nav__item"><a href="#inicio" class="nav__link">Inicio</a></li>
+                <li class="nav__item"><a href="#sobre-mi" class="nav__link">Sobre Mí</a></li>
+                <li class="nav__item"><a href="#proyectos" class="nav__link">Proyectos</a></li>
+                <li class="nav__item"><a href="#contacto" class="nav__link">Contacto</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main class="main-content">
+        
+        <!-- Sección Hero -->
+        <section id="inicio" class="hero">
+            <div class="hero__content">
+                <h1 class="hero__title">Hola, soy Agustin Mendoza</h1>
+                <p class="hero__subtitle">Desarrollador de Software enfocado en crear soluciones escalables y eficientes.</p>
+                <div class="hero__actions">
+                    <a href="#proyectos" class="btn btn--primary">Ver Proyectos</a>
+                    <a href="#contacto" class="btn btn--secondary">Contáctame</a>
+                </div>
+            </div>
+        </section>
+
+        <!-- Sección Sobre Mí -->
+        <section id="sobre-mi" class="about">
+            <div class="about__container">
+                <h2 class="about__title section-title">Sobre Mí</h2>
+                <div class="about__content">
+                    <p class="about__description">
+                        Soy estudiante de Ingeniería de Software. Me enfoco en arquitecturas limpias, principios SOLID y desarrollo tanto en frontend como en backend. 
+                    </p>
+                    <ul class="about__skills skills-list">
+                        <li class="skills-list__item">TypeScript</li>
+                        <li class="skills-list__item">C# / .NET</li>
+                        <li class="skills-list__item">React</li>
+                        <li class="skills-list__item">SQL</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- Sección Proyectos -->
+        <section id="proyectos" class="projects">
+            <h2 class="projects__title section-title">Proyectos Destacados</h2>
+            <div class="projects__grid">
+                
+                <!-- Tarjeta de Proyecto 1 -->
+                <article class="project-card">
+                    <img src="placeholder.jpg" alt="Captura de pantalla del proyecto 1" class="project-card__image" loading="lazy">
+                    <div class="project-card__body">
+                        <h3 class="project-card__title">Sistema de Gestión</h3>
+                        <p class="project-card__description">Aplicación con renderizado en el cliente, tipado estricto y separación de responsabilidades.</p>
+                        <div class="project-card__tech">
+                            <span class="tag">TypeScript</span>
+                            <span class="tag">Vite</span>
+                        </div>
+                        <div class="project-card__links">
+                            <a href="#" class="project-card__link">Ver Código</a>
+                            <a href="#" class="project-card__link">Demo Live</a>
+                        </div>
+                    </div>
+                </article>
+
+                <!-- Tarjeta de Proyecto 2 -->
+                <article class="project-card">
+                    <img src="placeholder.jpg" alt="Captura de pantalla del proyecto 2" class="project-card__image" loading="lazy">
+                    <div class="project-card__body">
+                        <h3 class="project-card__title">API RESTful</h3>
+                        <p class="project-card__description">Backend estructurado en 3 capas (API, Business, Data) aplicando patrones de diseño.</p>
+                        <div class="project-card__tech">
+                            <span class="tag">C#</span>
+                            <span class="tag">.NET</span>
+                        </div>
+                        <div class="project-card__links">
+                            <a href="#" class="project-card__link">Ver Código</a>
+                        </div>
+                    </div>
+                </article>
+
+            </div>
+        </section>
+
+        <!-- Sección Contacto -->
+        <section id="contacto" class="contact">
+            <h2 class="contact__title section-title">Ponte en Contacto</h2>
+            <form action="#" method="POST" class="contact__form form">
+                <div class="form__group">
+                    <label for="name" class="form__label">Nombre</label>
+                    <input type="text" id="name" name="name" class="form__input" required>
+                </div>
+                <div class="form__group">
+                    <label for="email" class="form__label">Correo Electrónico</label>
+                    <input type="email" id="email" name="email" class="form__input" required>
+                </div>
+                <div class="form__group">
+                    <label for="message" class="form__label">Mensaje</label>
+                    <textarea id="message" name="message" class="form__textarea" rows="5" required></textarea>
+                </div>
+                <button type="submit" class="form__submit btn btn--primary">Enviar Mensaje</button>
+            </form>
+        </section>
+
+    </main>
+
+    <footer class="footer">
+        <div class="footer__content">
+            <p class="footer__copyright">&copy; 2026 [Tu Nombre]. Todos los derechos reservados.</p>
+            <div class="footer__social social-links">
+                <a href="#" class="social-links__item" aria-label="Perfil de GitHub">GitHub</a>
+                <a href="#" class="social-links__item" aria-label="Perfil de LinkedIn">LinkedIn</a>
+            </div>
+        </div>
+    </footer>
+
+</body>
+</html>
