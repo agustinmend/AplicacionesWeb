@@ -1,0 +1,173 @@
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background-color: #0f1115;
+  color: #e8eaed;
+  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+  line-height: 1.6;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+ul {
+  list-style: none;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 1.5rem;
+  border-bottom: 1px solid #2a2f3a;
+  background-color: #0f1115;
+}
+
+.header__name {
+  font-weight: 600;
+  font-size: 1.1rem;
+}
+
+.header__nav-list {
+  display: flex;
+  gap: 1.5rem;
+}
+
+.header__nav-link {
+  color: #9aa0a8;
+  font-size: 0.9rem;
+}
+
+.header__nav-link:hover {
+  color: #5fd1a0;
+}
+
+.main {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 0 1.5rem;
+}
+
+.home {
+  padding: 4rem 0 3rem;
+  border-bottom: 1px solid #2a2f3a;
+}
+
+.home__jod {
+  font-size: 2rem;
+  font-weight: 700;
+  margin-bottom: 1rem;
+  text-transform: capitalize;
+}
+
+.home__description {
+  color: #9aa0a8;
+  max-width: 50ch;
+}
+
+.projects {
+  padding: 3.5rem 0;
+  border-bottom: 1px solid #2a2f3a;
+}
+
+.projects__title {
+  font-size: 1.6rem;
+  font-weight: 600;
+  margin-bottom: 2rem;
+}
+
+.projects__examples {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.projects__card {
+  background-color: #171a21;
+  border: 1px solid #2a2f3a;
+  border-radius: 8px;
+  padding: 1.4rem;
+}
+
+.projects__card-title {
+  font-size: 1.15rem;
+  font-weight: 600;
+  margin-bottom: 0.6rem;
+}
+
+.projects__card-description {
+  color: #9aa0a8;
+  font-size: 0.95rem;
+  margin-bottom: 1.2rem;
+}
+
+.projects__card-link {
+  color: #5fd1a0;
+  font-size: 0.9rem;
+}
+
+.projects__card-link:hover {
+  text-decoration: underline;
+}
+
+.contact {
+  padding: 3.5rem 0;
+}
+
+.contact__title {
+  font-size: 1.6rem;
+  font-weight: 600;
+  margin-bottom: 0.6rem;
+}
+
+.contact__message {
+  color: #9aa0a8;
+  margin-bottom: 1.8rem;
+}
+
+.contact__links {
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+  max-width: 280px;
+}
+
+.contact__link {
+  display: block;
+  padding: 0.9rem 1.1rem;
+  background-color: #171a21;
+  border: 1px solid #2a2f3a;
+  border-radius: 8px;
+}
+
+.contact__link:hover {
+  border-color: #5fd1a0;
+}
+
+.contact__link-label {
+  font-size: 0.9rem;
+  color: #9aa0a8;
+}
+
+.footer {
+  border-top: 1px solid #2a2f3a;
+  padding: 1.4rem;
+  text-align: center;
+}
+
+.footer__text {
+  font-size: 0.85rem;
+  color: #9aa0a8;
+}
