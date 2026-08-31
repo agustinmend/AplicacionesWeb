@@ -1,27 +1,76 @@
 # isw233-despliegue-mendoza
-## Uso de IA
-- elaboracion de css
-- correccion de etiquetas html
-- Explicacion de partes del documento
-- Aclaracion de conceptos
-- Encontrar donde colocar la llave en putty
-- Explicacion de respuestas de terminal cuando se conecta con github y uso de llave
-- Explicacion de error al instalar python, la IA me menciono que ubuntu ya venia con su python por defecto y q este tenia algunas restricciones y me sugirio usar entorno virtual lo cual acepte debido a q lo hemos visto un par de veces en clases
-- Comando para crear entorno virtual y para conectarse
-- Explicacion de debug=True y si afectaba al momento de desplegar
-- Ayuda para matar proceso
+Se realizo comparacion de indices en los siguientes casos:
+- columna created se obtuvo antes del indice:
+```
+                                             QUERY PLAN
+----------------------------------------------------------------------------------------------------
+ Seq Scan on customers  (cost=0.00..8.75 rows=1 width=82) (actual time=2.749..2.750 rows=0 loops=1)
+   Filter: (created = '2026-01-01 00:00:00+00'::timestamp with time zone)
+   Rows Removed by Filter: 300
+ Planning Time: 268.982 ms
+ Execution Time: 2.912 ms
+(5 rows)
+```
+Despues del indice:
+```
+                                                           QUERY PLAN                                                   
+---------------------------------------------------------------------------------------------------------------------------------
+ Index Scan using customer_created_idx on customers  (cost=0.15..4.17 rows=1 width=82) (actual time=0.985..1.090 rows=0 loops=1)
+   Index Cond: (created = '2026-01-01 00:00:00+00'::timestamp with time zone)
+ Planning Time: 49.309 ms
+ Execution Time: 2.682 ms
+(4 rows)
+```
 
-## Levantamiento del servicor sin docker
-- En primera no corrio sospecho del debuger active que me imprime la consola,
-- Ahora funciona en mi maquina pero no el servidor
-- Acabo de abrir ambos ssh uno donde corre el flask y el otro donde hace la solicitud con ambos comandos si hubo repuesta, ahora cuando coloco la direccion en el navegador no me carga lo cual supongo que puede ser que ambas maquinas ssh pertenecen a la mismar instancia y por eso es que si funcionan las peticiones, segun creo podria ser algo tipo como que falte habilitar el puerto
-- el parametro en flask fue el de host a 0.0.0.0 debido a q si ponemos cualquier otro solo se va a escuchar a esa ip, pero al poner 0.0.0.0 estamos diciendo que escuche a todos
+como se puede observar hubo una mejora en comparacion al momento de realizar la busqueda en el tiempo de ejecucion hay una diferencia de 0.3 ms entre consultas lo cual es una diferencia que se va notando mas mientras la BD crece
 
-- El ssh en produccion deberia ser restringido solo a direcciones especificas q conocemos dado que si lo ponemos para todos cualquiera puede intentar conectarse y ya para todo publico tendria q haber una unica entrada q sea gestionada por un proxy inverso como ngnix
+- Tambien se vio la necesidad de crear un indice para la columna reservation_time en la tabla reservations debido a la alta demanda q va a tener esta columna al momento de filtrar reservaciones por hora la reserva u ordenarlas:
+Sin indice:
+```
+                                               QUERY PLAN
+--------------------------------------------------------------------------------------------------------
+ Seq Scan on reservations  (cost=0.00..14.25 rows=1 width=81) (actual time=4.929..4.930 rows=0 loops=1)
+   Filter: (reservation_time = '2026-01-01 00:00:00+00'::timestamp with time zone)
+   Rows Removed by Filter: 500
+ Planning Time: 46.160 ms
+ Execution Time: 4.966 ms
+(5 rows)
 
-## Docker
-- El COPY en el dockerfile copia los elementos de mi maquina local a el contenedor, en este caso al usar el . esta diciendo q copie todo los elementos que estan en la misma altura del dockerfile y los pegue en una carpeta /site/ dentro del contenedor, si tuviera un .pem en el directorio al no haber nada q me limite yo pienso que igual lo copiaria al contenedor lo cual no seria muy bueno q digamos, en el caso de los puertos a lo q yo tengo entendido el EXPOSE en Dockerfile es mas como documentacion no es que lo exponga por ende se seguiria escuchando en el 8000
+```
+Con indice:
+```
+                                                                   QUERY PLAN                                           
+-------------------------------------------------------------------------------------------------------------------------------------------------
+ Index Scan using reservations_reservation_time_idx on reservations  (cost=0.27..8.29 rows=1 width=81) (actual time=1.853..1.855 rows=0 loops=1)
+   Index Cond: (reservation_time = '2026-01-01 00:00:00+00'::timestamp with time zone)
+ Planning Time: 7.763 ms
+ Execution Time: 1.875 ms
+(4 rows)
+```
+se puede observar que el tiempo de ejecucion bajo drasticamente de 4.966 a 1.875 ms
 
-- Al ejecutar el docker run y despues docker ps este no esta vivo, en los logs dice No module named flask, despues de un error que tuve con el dockerfile ahora si esta vivo
+- Tambien se vio la necesidad de crear un indice en la columna created en la tabla orders debido a que para la administracion va a ser muy comun la realizacion y manejo de sus ordenes por determinados rangos de tiempo como semanas, dias, etc.
+Sin indices:
+```
+                                             QUERY PLAN
+----------------------------------------------------------------------------------------------------
+ Seq Scan on orders  (cost=0.00..31.00 rows=1 width=79) (actual time=25.382..25.383 rows=0 loops=1)
+   Filter: (created = '2026-01-01 00:00:00+00'::timestamp with time zone)
+   Rows Removed by Filter: 800
+ Planning Time: 68.841 ms
+ Execution Time: 25.645 ms
+(5 rows)
+```
+Con indices:
 
-- Cuando se hace un cambio la pantalla en mi browser no se actualiza automaticamente, pero cuando se reinicia el contenedor sin reconstruir si se actualiza
+```
+                                                         QUERY PLAN                                                     
+----------------------------------------------------------------------------------------------------------------------------
+ Index Scan using orders_created_idx on orders  (cost=0.15..4.17 rows=1 width=79) (actual time=1.119..1.120 rows=0 loops=1)
+   Index Cond: (created = '2026-01-01 00:00:00+00'::timestamp with time zone)
+ Planning Time: 7.778 ms
+ Execution Time: 1.150 ms
+(4 rows)
+```
+
+En este caso tambien se logra apreciar una enorme baja en el tiempo de ejecucion siendo la consulta sin indices ejecutada en un tiempo de 25.0645ms mientras que al aplicar indices esta misma consulta bajo a 1.150ms
