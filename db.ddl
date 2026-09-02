@@ -39,6 +39,7 @@ CREATE TABLE content.reservations (
 
 CREATE TABLE content.products (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    category_id UUID NOT NULL,
     name VARCHAR(150) NOT NULL,
     description TEXT,
     current_price DECIMAL(10, 2) NOT NULL CHECK (current_price >= 0),
@@ -46,6 +47,15 @@ CREATE TABLE content.products (
     created TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     modified TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
+
+CREATE TABLE content.categories (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    name VARCHAR(100) NOT NULL UNIQUE,
+    description TEXT,
+    created TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    modified TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
 
 CREATE TABLE content.orders (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),

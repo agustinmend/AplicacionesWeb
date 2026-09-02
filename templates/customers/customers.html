@@ -1,0 +1,12 @@
+{% extends "layout.html" %}
+
+{% block titulo %}
+<h1>Platos para todos</h1>
+{% endblock %}
+
+
+{% block contenido %}
+    {%for c in clientes %}
+        <h2>{{clientes.first_name}}</h2>
+    {% endfor %}
+{% endblock %}
