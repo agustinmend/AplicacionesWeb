@@ -8,7 +8,7 @@ services:
     volumes:
       - datos_pg:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U lacarta"]
+      test: ["CMD-SHELL", "pg_isready -U app"]
       interval: 5s
       retries: 10
   web:
