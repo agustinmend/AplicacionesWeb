@@ -2,13 +2,14 @@ services:
   db:
     image: postgres:16
     environment:
-      POSTGRES_DB: restaurant_database
-      POSTGRES_USER: app
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${DB_NAME}
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
     volumes:
       - datos_pg:/var/lib/postgresql/data
+      - ./db/initdb:/docker-entrypoint-initdb.d:ro
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U app"]
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_NAME}"]
       interval: 5s
       retries: 10
   web:
@@ -16,10 +17,23 @@ services:
     ports:
       - "8000:8000"
     environment:
-      DATABASE_URL: postgresql://app:${POSTGRES_PASSWORD}@db:5432/restaurant_database
-      SECRET_KEY: ${SECRET_KEY}
+      DATABASE_URL: postgresql://${DB_USER}:${DB_PASSWORD}@db:5432/${DB_NAME}
+      SECRET_KEY: ${APP_SECRET_KEY}
     depends_on:
       db:
         condition: service_healthy
+
+  django:
+    build: ./Django
+    ports:
+      - "8001:8000"
+    environment:
+      DATABASE_URL: postgresql://${DB_USER}:${DB_PASSWORD}@db:5432/${DB_NAME}
+      DJANGO_SECRET_KEY: ${DJANGO_SECRET_KEY}
+      DEBUG: ${DEBUG}
+    depends_on:
+      db:
+        condition: service_healthy
+
 volumes:
   datos_pg:

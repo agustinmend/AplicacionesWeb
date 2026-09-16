@@ -11,7 +11,7 @@ import datetime
 
 app = Flask(__name__)
 
-app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://app:123qwe@localhost:5432/restaurant_database'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://app:123qwe@db:5432/restaurant_database'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db.init_app(app)
 
@@ -44,8 +44,14 @@ def create_customer():
 
     return redirect(url_for('get_customer_by_id', person_id=customer.id))
 
-
-
+###
+###@app.route('/customer/delete/<uuid:person_id>', methods=['DELETE'])
+###def delete_customer(person_id):
+###    customer = Customer.query,get(person_id)
+###    if customer is None:
+###        abort(404)
+    
+###
 #FIN
 
 @app.route('/customers/<uuid:person_id>', methods=['GET'])
