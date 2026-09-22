@@ -7,13 +7,16 @@ from flask import Flask, render_template, jsonify, abort, request, redirect, url
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.dialects.postgresql import UUID
 from config.db import db
+from flask_migrate import Migrate
 import datetime
 
 app = Flask(__name__)
 
+migrate = Migrate()
 app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://app:123qwe@db:5432/restaurant_database'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db.init_app(app)
+migrate.init_app(app, db)
 
 @app.route('/customers', methods=['GET'])
 def get_customers():
@@ -28,30 +31,70 @@ def get_customers():
 def get_form():
     return render_template('customers/formulario.html')
 
+@app.route('/clientes', methods=['GET'])
+def list_customers_view():
+    customers = Customer.query.all()
+    return render_template('customers/customers.html', clientes=customers)
+
+@app.route('/customer/editar/<uuid:person_id>', methods=['GET'])
+def edit_form(person_id):
+    customer = Customer.query.get(person_id)
+    if customer is None:
+        abort(404)
+    return render_template('customers/editar.html', customer=customer)
+
+@app.route('/customer/update/<uuid:person_id>', methods=['POST'])
+def update_customer(person_id):
+    customer = Customer.query.get(person_id)
+    if customer is None:
+        abort(404)
+    
+    try:
+        customer.first_name = request.form.get('first_name', customer.first_name)
+        customer.last_name = request.form.get('last_name', customer.last_name)
+        customer.email = request.form.get('email', customer.email)
+        customer.phone = request.form.get('phone', customer.phone)
+        
+        db.session.commit()
+        return redirect(url_for('list_customers_view'))
+    except Exception as e:
+        db.session.rollback()
+        return f"Error al actualizar: {str(e)}", 500
+
+@app.route('/customer/delete/<uuid:person_id>', methods=['POST'])
+def delete_customer(person_id):
+    customer = Customer.query.get(person_id)
+    if customer is None:
+        abort(404)
+        
+    try:
+        db.session.delete(customer)
+        db.session.commit()
+        return redirect(url_for('list_customers_view'))
+    except Exception as e:
+        db.session.rollback()
+        return f"Error al eliminar: {str(e)}", 500
+
 @app.route('/customer/crear', methods=['POST'])
 def create_customer():
     try:
         customer = Customer(
-            first_name = request.form['first_name'],
-            last_name = request.form['last_name'],
-            email = request.form['email'],
-            phone = request.form['phone']
+            first_name=request.form['first_name'],
+            last_name=request.form['last_name'],
+            email=request.form['email'],
+            phone=request.form['phone']
         )
         db.session.add(customer)
         db.session.commit()
-    except Exception:
+        return redirect(url_for('get_customer_by_id', person_id=customer.id))
+        
+    except Exception as e:
         db.session.rollback()
+        return jsonify({'success': False,
+                        'error': 400,
+                        'mensaje': 'Error al crear cliente',
+                        'detalles': str(e)}), 400
 
-    return redirect(url_for('get_customer_by_id', person_id=customer.id))
-
-###
-###@app.route('/customer/delete/<uuid:person_id>', methods=['DELETE'])
-###def delete_customer(person_id):
-###    customer = Customer.query,get(person_id)
-###    if customer is None:
-###        abort(404)
-    
-###
 #FIN
 
 @app.route('/customers/<uuid:person_id>', methods=['GET'])

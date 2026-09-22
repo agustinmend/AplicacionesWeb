@@ -13,7 +13,7 @@ RUN pip install --upgrade pip \
 
 COPY . .
 RUN python manage.py collectstatic --noinput
-EXPOSE 8000
+EXPOSE 8001
 
 USER web
 

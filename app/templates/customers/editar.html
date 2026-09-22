@@ -1,0 +1,17 @@
+{% extends "layout.html" %}
+
+{% block titulo %}
+<h1>Editar Cliente</h1>
+{% endblock %}
+
+{% block contenido %}
+    <form action="{{ url_for('update_customer', person_id=customer.id) }}" method="POST">
+        <input type="text" name="first_name" value="{{ customer.first_name }}" required>
+        <input type="text" name="last_name" value="{{ customer.last_name }}" required>
+        <input type="email" name="email" value="{{ customer.email }}" required>
+        <input type="text" name="phone" value="{{ customer.phone }}" required>
+        
+        <button type="submit">Actualizar</button>
+        <a href="{{ url_for('list_customers_view') }}">Cancelar</a>
+    </form>
+{% endblock %}

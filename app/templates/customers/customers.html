@@ -1,12 +1,26 @@
 {% extends "layout.html" %}
 
 {% block titulo %}
-<h1>Platos para todos</h1>
+<h1>Lista de Clientes</h1>
 {% endblock %}
 
-
 {% block contenido %}
-    {%for c in clientes %}
-        <h2>{{clientes.first_name}}</h2>
+    <a href="{{ url_for('get_form') }}">Crear Nuevo Cliente</a>
+    <hr>
+
+    {% for c in clientes %}
+        <div>
+            <h2>{{ c.first_name }} {{ c.last_name }}</h2>
+            <p>Email: {{ c.email }} | Tel: {{ c.phone }}</p>            
+            <a href="{{ url_for('edit_form', person_id=c.id) }}">
+                <button type="button">Editar</button>
+            </a>
+            <form action="{{ url_for('delete_customer', person_id=c.id) }}" method="POST" style="display:inline;">
+                <button type="submit">Eliminar</button>
+            </form>
+        </div>
+        <hr>
+    {% else %}
+        <p>No hay clientes registrados.</p>
     {% endfor %}
 {% endblock %}

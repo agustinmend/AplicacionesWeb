@@ -11,6 +11,7 @@
         <input type="text" name="last_name">
         <input type="text" name="email">
         <input type="text" name="phone">
-        <button type="submit">enviar</button>
+        <button type="submit">Guardar</button>
+        <a href="{{ url_for('list_customers_view') }}">Cancelar</a>
     </form>
 {% endblock %}
