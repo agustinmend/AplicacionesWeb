@@ -1,0 +1,33 @@
+# Git
+.git/
+.gitignore
+
+# Entornos virtuales
+.venv/
+venv/
+env/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Variables de entorno
+.env
+.env.*
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+
+# IDE / editores
+.vscode/
+.idea/
+
+# Logs
+*.log
+
+# Sistema operativo
+.DS_Store
+Thumbs.db
