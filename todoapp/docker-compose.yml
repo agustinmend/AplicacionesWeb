@@ -10,9 +10,33 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
-        test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER:-todo} -d $${POSTGRES_DB:-todoapp}"]      
-        interval: 5s
-        timeout: 5s
-        retries: 10
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER:-todo} -d $${POSTGRES_DB:-todoapp}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  web:
+    build: .
+    expose:
+      - "5000"
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER:-todo}:${POSTGRES_PASSWORD:-todo}@db:5432/${POSTGRES_DB:-todoapp}
+      GUNICORN_WORKERS: "2"
+    depends_on:
+      db:
+        condition: service_healthy
+    volumes:
+      - .:/app
+
+  nginx:
+    image: nginx:1.27-alpine
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+    depends_on:
+      - web
+
+
 volumes:
   postgres_data:

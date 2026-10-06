@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+
+{% block content %}
+<form action="{{ url_for('todos.create') }}" method="POST">
+    <input type="text" name="title" required placeholder="Título">
+    <input type="text" name="description" placeholder="Descripción">
+    <button type="submit">Crear</button>
+</form>
+
+<hr>
+
+<ul>
+    {% for todo in todos %}
+        <li>
+            {{ todo.title }} - {{ todo.description }}
+            <a href="{{ url_for('todos.edit', todo_id=todo.id) }}">Editar</a>
+            <form action="{{ url_for('todos.delete', todo_id=todo.id) }}" method="POST" style="display:inline;">
+                <button type="submit">Eliminar</button>
+            </form>
+        </li>
+    {% else %}
+        <li>No hay tareas.</li>
+    {% endfor %}
+</ul>
+{% endblock %}
