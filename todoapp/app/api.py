@@ -7,3 +7,4 @@ def list_todos():
                     {"id": t.id, "title": t.title, "completed": t.completed}
                     for t in Todo.query.all()
     ])
+

@@ -1,0 +1,9 @@
+<h1>Registration</h1>
+<form action="{{ url_for('todos.registration_user') }}" method="POST">
+    <label for="">Username</label>
+    <input type="text" name="username" required>
+    <label for="">Password</label>
+    <input type="password" name="password" required>
+    <button type="submit">Register</button>
+    <a href="{{ url_for('todos.render_login') }}">Ya tienes cuenta?</a>
+</form>

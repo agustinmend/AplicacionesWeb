@@ -5,6 +5,17 @@ class Config:
     SECRET_KEY = os.environ.get("SECRET_KEY", "dev-secret-change-me")
     SQLALCHEMY_DATABASE_URI = os.environ.get(
         "DATABASE_URL",
-        "postgresql://postgres:123qwe@localhost:5432/postgres",
+        "",
     )
     SQLALCHEMY_TRACK_MODIFICATIONS = False
+
+    JWT_SECRET_KEY = os.environ.get("JWT_SECRET_KEY", "dev-jwt-secret-change-me-32-bytes-min")
+    JWT_EXPIRE_MINUTES = int(os.environ.get("JWT_EXPIRE_MINUTES", "60"))
+    JWT_ISSUER = os.environ.get("JWT_ISSUER", "flask-todoapp")
+
+class TestConfig(Config):
+    Testing = True
+    SECRET_KEY = "test-secret"
+    SQLALCHEMY_DATABASE_URI = "sqlite://"
+    JWT_SECRET_KEY = "test-jwt-secret-with-at-least-32-bytes"
+    JWT_EXPIRE_MINUTES = 5
