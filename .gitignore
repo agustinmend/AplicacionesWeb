@@ -7,7 +7,6 @@ venv/
 env/
 ENV/
 .env
-.env.*
 
 build/
 dist/

@@ -6,12 +6,12 @@
 
 
 {% block contenido %}
-    <form action="{{ url_for('create_customer')}}" method="post">
+    <form action="{{ url_for('main.create_customer')}}" method="post">
         <input type="text" name="first_name">
         <input type="text" name="last_name">
         <input type="text" name="email">
         <input type="text" name="phone">
         <button type="submit">Guardar</button>
-        <a href="{{ url_for('list_customers_view') }}">Cancelar</a>
+        <a href="{{ url_for('main.list_customers_view') }}">Cancelar</a>
     </form>
 {% endblock %}
