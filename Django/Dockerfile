@@ -12,9 +12,8 @@ RUN pip install --upgrade pip \
     && pip install -r requirements.txt
 
 COPY . .
+RUN chmod +x entrypoint.sh && chown -R web:web /opt/app
 RUN python manage.py collectstatic --noinput
 EXPOSE 8001
-
 USER web
-
-ENTRYPOINT ["uwsgi", "--strict", "--ini", "uwsgi.ini"]
+ENTRYPOINT ["./entrypoint.sh"]

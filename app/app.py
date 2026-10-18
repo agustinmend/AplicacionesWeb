@@ -13,7 +13,11 @@ import datetime
 app = Flask(__name__)
 
 migrate = Migrate()
-app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://app:123qwe@db:5432/restaurant_database'
+app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get(
+    'DATABASE_URL', 
+    'postgresql://'
+)
+app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'dev-secret')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db.init_app(app)
 migrate.init_app(app, db)
