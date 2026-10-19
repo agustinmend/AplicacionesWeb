@@ -1,9 +1,3 @@
-from flask import Flask
-from config import Config
-from extensions import db, migrate
-import models
-from routes import bp as main_bp
-
 """JWT authentication: register, login and a decorator that requires a valid token.
 Follows the structure of the Identity and Access Management course:
 AuthError              -> error with its HTTP status code
@@ -15,9 +9,9 @@ client sends them back in the Authorization header on every request; no
 cookies are involved.
 """
 
-from .decorators import get_token_auth_header, requires_auth
-from .errors import AuthError
-from .tokens import create_access_token, verify_decode_jwt
+from auth.decorators import get_token_auth_header, requires_auth
+from auth.errors import AuthError
+from auth.tokens import create_access_token, verify_decode_jwt
 __all__ = [
     "AuthError",
     "create_access_token",
@@ -25,15 +19,3 @@ __all__ = [
     "requires_auth",
     "verify_decode_jwt",
 ]
-
-
-def create_app(config_class=Config):
-    app = Flask(__name__, template_folder='../templates', static_folder='../static')
-    app.config.from_object(config_class)
-
-    db.init_app(app)
-    migrate.init_app(app, db)
-
-    app.register_blueprint(main_bp)
-
-    return app

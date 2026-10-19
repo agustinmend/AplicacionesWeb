@@ -1,17 +1,32 @@
+
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="./static/styles.css">
-    <title>{% block titulo %}{% endblock %}</title>
+    <title>{% block title %}RESTAURANTE{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
 <body>
-    <nav>
-    </nav>
+    <header class="site-header">
+        <h1><a href="{{ url_for('main.index') }}">RESTAURANTE</a></h1>
+        <nav class="site-nav">
+            <span id="who" class="who"></span>
+            <button type="button" id="logout" class="btn btn-small btn-light" hidden>
+                Cerrar sesión
+            </button>
+        </nav>
+    </header>
 
-    <main>{% block contenido %}{% endblock %}</main>
+    <main class="container">
+        <p id="message" class="flash" hidden></p>
+        {% block content %}{% endblock %}
+    </main>
 
-    <footer></footer>
+    <footer class="site-footer">
+        Flask + PostgreSQL + Flask-Migrate + JWT
+    </footer>
+
+    {% block scripts %}{% endblock %}
 </body>
 </html>

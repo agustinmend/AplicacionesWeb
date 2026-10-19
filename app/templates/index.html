@@ -1,102 +1,85 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Portafolio Agustin Mendoza</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css')}}">
-</head>
-<body>
-    <header class="header">
-        <p class="header__name">Agustín Mendoza</p>
-        <nav class="header__nav">
-        <ul class="header__nav-list">
-            <li class="header__nav-item"><a class="header__nav-link" href="#projects">Proyectos</a></li>
-            <li class="header__nav-item"><a class="header__nav-link" href="#contact">Contacto</a></li>
-        </ul>
-        </nav>
-    </header>
- 
-  <main class="main">
- 
-    <section class="home">
-        <div class="home__Presentation">
-            <h1 class="home__jod">desarrollador de software</h1>
-            <p class="home__description">Soy una persona tranquila, con gusto por el trabajo en equipo y me gusta desarrollar nuevas habilidades.</p>
+
+{% extends "layout.html" %}
+
+{% block title %}Restaurante{% endblock %}
+
+{% block content %}
+
+<!-- LOGIN -->
+<section id="auth-view" class="card auth-card" hidden>
+    <h2>Iniciar sesión</h2>
+
+    <form id="login-form" class="todo-form">
+        <label for="username">Usuario</label>
+        <input type="text" id="username" name="username"
+               required autocomplete="username">
+
+        <label for="password">Contraseña</label>
+        <input type="password" id="password" name="password"
+               required autocomplete="current-password">
+
+        <div class="form-actions">
+            <button type="submit" class="btn btn-primary">
+                Iniciar sesión
+            </button>
         </div>
+    </form>
+    <button type="button" id="register" class="btn">
+        Crear cuenta
+    </button>
+</section>
+
+<!-- PANEL DEL RESTAURANTE -->
+<div id="customers-view" hidden>
+
+    <!-- REGISTRAR CLIENTE -->
+    <section class="card">
+        <h2>Registrar cliente</h2>
+
+        <form id="create-form" class="todo-form">
+            <input type="text" name="first_name"
+                   placeholder="Nombre" maxlength="100" required>
+
+            <input type="text" name="last_name"
+                   placeholder="Apellido" maxlength="100" required>
+
+            <input type="email" name="email"
+                   placeholder="Correo (opcional)" maxlength="150">
+
+            <input type="tel" name="phone"
+                   placeholder="Teléfono" maxlength="20" required>
+
+            <button type="submit" class="btn btn-primary">
+                Registrar cliente
+            </button>
+        </form>
     </section>
- 
-    <section class="projects" id="projects">
-        <div class="projects__section">
-            <h2 class="projects__title">Proyectos</h2>
-            <div class="projects__examples">
 
-                <article class="projects__card">
-                    <div class="projects__card-body">
-                        <h3 class="projects__card-title">Gestion de Hospedaje en Hotel</h3>
-                        <p class="projects__card-description">
-                        Pagina web administrativa para el manejo de registros en hotel, utilizando herramientas como .Net y Angular
-                        </p>
-                        <a class="projects__card-link" href="https://github.com/agustinmend/1erBloqueTaller" target="_blank">
-                        Ver proyecto
-                        </a>
-                    </div>
-                </article>
+    <!-- LISTADO DE CLIENTES -->
+    <section class="card">
+        <h2>Clientes <span id="count" class="count"></span></h2>
 
-                <article class="projects__card">
-                    <div class="projects__card-body">
-                        <h3 class="projects__card-title">Red social de empresas</h3>
-                        <p class="projects__card-description">
-                        Pagina de Visualizacion de contenido de empresas, desarrollada usando .Net y Angular
-                        </p>
-                        <a class="projects__card-link" href="https://github.com/agustinmend/PrograII-ProyectoFinal" target="_blank">
-                        Ver proyecto
-                        </a>
-                    </div>
-                </article>
+        <ul id="customer-list" class="todo-list"></ul>
 
-                {{name | safe}}
-
-                <!--
-                {% if proyectos.len == 0 %}<div>Sin proyectos</div>{% endif %}
-                {% else %}
-                    {% for p in proyectos %}
-                        <article class="projects__card">
-                            <div class="projects__card-body">
-                                <h3 class="projects__card-title">{{p.titulo}}</h3>
-                                <p class="projects__card-description">
-                                {{p.descripcion}}
-                                </p>
-                                <a class="projects__card-link" href="https://github.com/agustinmend/PrograII-ProyectoFinal" target="_blank">
-                                Ver proyecto
-                                </a>
-                            </div>
-                        </article>
-                    {% endfor %}
-                {% endif %}-->
-            </div>
-        </div>
+        <p id="empty" class="empty" hidden>
+            No hay clientes registrados.
+        </p>
     </section>
- 
-    <section class="contact" id="contact">
-        <h2 class="contact__title">Contacto</h2>
-        <p class="contact__message">Desarrollemos un proyecto</p>
-        <div class="contact__links">
-            <a class="contact__link" href="jose.mendoza.u1@ucb.edu.bo">
-                <span class="contact__link-label">Correo</span>
-            </a>
-            <a class="contact__link" href="https://github.com/agustinmend">
-                <span class="contact__link-label">GitHub</span>
-            </a>
-        </div>
+
+    <!-- LISTADO DE MESAS -->
+    <section class="card">
+        <h2>Mesas del restaurante</h2>
+
+        <ul id="table-list" class="todo-list"></ul>
+        <p id="table-empty" class="empty" hidden>
+            No hay mesas registradas.
+        </p>
     </section>
- 
-  </main>
- 
-  <footer class="footer">
-    <div class="footer__content">
-      <p class="footer__text">Agustín Mendoza · ISW-233 · 2-2026</p>
-    </div>
-  </footer>
-</body>
-</html>
+
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/app.js') }}"></script>
+{% endblock %}
