@@ -1,9 +1,9 @@
 import re
 from flask import Blueprint, current_app, jsonify, request
 from werkzeug.security import generate_password_hash
-from extensions import db
-from models import User
-from auth.tokens import create_access_token
+from ..extensions import db
+from ..models import User
+from .tokens import create_access_token
 
 bp = Blueprint("auth", __name__, url_prefix="/auth")
 

@@ -2,7 +2,7 @@ import uuid
 from datetime import datetime, timezone
 from werkzeug.security import check_password_hash, generate_password_hash
 from sqlalchemy.dialects.postgresql import UUID
-from extensions import db
+from .extensions import db
 
 def utcnow():
     return datetime.now(timezone.utc)

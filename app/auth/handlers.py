@@ -1,5 +1,5 @@
 from flask import jsonify
-from auth.errors import AuthError
+from .errors import AuthError
 
 def handle_auth_error(err: AuthError):
     """Every auth failure becomes the same JSON shape, with its real status code."""

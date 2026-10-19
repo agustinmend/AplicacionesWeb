@@ -1,13 +1,12 @@
 
 from flask import Blueprint, jsonify, request
 from sqlalchemy.exc import IntegrityError
-from auth.decorators import requires_auth
-from auth.routes import json_error
-from extensions import db
-from models import Customer, Tables
+from .auth.decorators import requires_auth
+from .auth.routes import json_error
+from .extensions import db
+from .models import Customer, Tables
 
 bp = Blueprint("api", __name__, url_prefix="/api")
-
 
 # API PRINCIPAL
 

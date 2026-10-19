@@ -1,6 +1,6 @@
 from flask import Flask
-from config import Config
-from extensions import db, migrate
+from .config import Config
+from .extensions import db, migrate
 
 def create_app(config_class=Config):
     app = Flask(__name__)
@@ -12,12 +12,12 @@ def create_app(config_class=Config):
     db.init_app(app)
     migrate.init_app(app, db)
     
-    import models  # noqa: F401  (registers the tables for migrations)
-    from api import bp as api_bp
-    from auth.errors import AuthError
-    from auth.handlers import handle_auth_error
-    from auth.routes import bp as auth_bp
-    from routes import bp as todos_bp
+    from . import models  # noqa: F401  (registers the tables for migrations)
+    from .api import bp as api_bp
+    from .auth.errors import AuthError
+    from .auth.handlers import handle_auth_error
+    from .auth.routes import bp as auth_bp
+    from .routes import bp as todos_bp
     
     app.register_blueprint(todos_bp)
     app.register_blueprint(auth_bp)

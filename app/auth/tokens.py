@@ -1,7 +1,7 @@
 from datetime import datetime, timedelta, timezone
 import jwt
 from flask import current_app
-from auth.errors import AuthError
+from .errors import AuthError
 
 ALGORITHM = "HS256"
 

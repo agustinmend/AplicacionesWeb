@@ -9,9 +9,9 @@ client sends them back in the Authorization header on every request; no
 cookies are involved.
 """
 
-from auth.decorators import get_token_auth_header, requires_auth
-from auth.errors import AuthError
-from auth.tokens import create_access_token, verify_decode_jwt
+from .decorators import get_token_auth_header, requires_auth
+from .errors import AuthError
+from .tokens import create_access_token, verify_decode_jwt
 __all__ = [
     "AuthError",
     "create_access_token",

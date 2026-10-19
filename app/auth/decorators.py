@@ -1,7 +1,7 @@
 from functools import wraps
 from flask import request
-from auth.errors import AuthError
-from auth.tokens import verify_decode_jwt
+from .errors import AuthError
+from .tokens import verify_decode_jwt
 
 def get_token_auth_header():
     """Return the raw JWT from `Authorization: Bearer <token>`.
