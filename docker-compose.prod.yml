@@ -16,7 +16,7 @@ services:
     restart: unless-stopped
 
   migrate:
-    build: ./Django
+    image: restaurante-django:latest
     entrypoint: ["python", "manage.py", "migrate", "--noinput"]
     environment: &django_env
       DB_NAME: ${DB_NAME}
@@ -32,7 +32,7 @@ services:
     restart: "no"
 
   collectstatic:
-    build: ./Django
+    image: restaurante-django:latest
     user: "0:0"
     entrypoint: ["python", "manage.py", "collectstatic", "--noinput"]
     environment: *django_env
@@ -44,6 +44,7 @@ services:
     restart: "no"
 
   django:
+    image: restaurante-django:latest
     build: ./Django
     environment:
       <<: *django_env
@@ -51,6 +52,8 @@ services:
       DJANGO_SUPERUSER_EMAIL: ${DJANGO_SUPERUSER_EMAIL}
       DJANGO_SUPERUSER_PASSWORD: ${DJANGO_SUPERUSER_PASSWORD}
     depends_on:
+      migrate:
+        condition: service_completed_successfully
       collectstatic:
         condition: service_completed_successfully
     restart: unless-stopped
