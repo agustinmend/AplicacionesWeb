@@ -1,0 +1,113 @@
+{% extends 'base.html' %}
+{% block title %}Administración{% endblock %}
+{% block content %}
+<h2>Administración de carta</h2>
+
+{% if current_user and 'write:carta' in current_user.permissions %}
+    <h3>Crear restaurante</h3>
+    <form class="form panel" method="post" action="{{ url_for('carta.crear_restaurante') }}">
+        <label class="form__label">Nombre
+            <input class="form__input" name="nombre" maxlength="120" required>
+        </label>
+        <label class="form__label">Ciudad
+            <input class="form__input" name="ciudad" maxlength="80" required>
+        </label>
+        <label class="form__label">Dirección
+            <input class="form__input" name="direccion" maxlength="200">
+        </label>
+        <label class="form__label">Teléfono
+            <input class="form__input" name="telefono" maxlength="30">
+        </label>
+        <button class="btn" type="submit">Crear restaurante</button>
+    </form>
+{% endif %}
+
+<h3>Restaurantes registrados</h3>
+{% for restaurante in restaurantes %}
+    <article class="panel">
+        <h4>{{ restaurante.nombre }} (ID {{ restaurante.id }})</h4>
+
+        {% if current_user and 'write:carta' in current_user.permissions %}
+            <form class="form" method="post" action="{{ url_for('carta.editar_restaurante', restaurante_id=restaurante.id) }}">
+                <label class="form__label">Nombre
+                    <input class="form__input" name="nombre" maxlength="120" value="{{ restaurante.nombre }}" required>
+                </label>
+                <label class="form__label">Ciudad
+                    <input class="form__input" name="ciudad" maxlength="80" value="{{ restaurante.ciudad }}" required>
+                </label>
+                <label class="form__label">Dirección
+                    <input class="form__input" name="direccion" maxlength="200" value="{{ restaurante.direccion or '' }}">
+                </label>
+                <label class="form__label">Teléfono
+                    <input class="form__input" name="telefono" maxlength="30" value="{{ restaurante.telefono or '' }}">
+                </label>
+                <button class="btn" type="submit">Guardar restaurante</button>
+            </form>
+        {% endif %}
+
+        {% if current_user and 'delete:carta' in current_user.permissions %}
+            <form class="form__actions" method="post" action="{{ url_for('carta.eliminar_restaurante', restaurante_id=restaurante.id) }}">
+                <button class="btn btn--danger" type="submit">Eliminar restaurante</button>
+            </form>
+        {% endif %}
+    </article>
+{% else %}
+    <p>No hay restaurantes.</p>
+{% endfor %}
+
+{% if current_user and 'write:carta' in current_user.permissions %}
+    <h3>Crear plato</h3>
+    <form class="form panel" method="post" action="{{ url_for('carta.crear_plato') }}">
+        <label class="form__label">Restaurante
+            <select class="form__select" name="restaurante_id" required>
+                {% for restaurante in restaurantes %}
+                    <option value="{{ restaurante.id }}">{{ restaurante.nombre }}</option>
+                {% endfor %}
+            </select>
+        </label>
+        <label class="form__label">Nombre
+            <input class="form__input" name="nombre" maxlength="120" required>
+        </label>
+        <label class="form__label">Precio (Bs)
+            <input class="form__input" type="number" name="precio" min="0.01" step="0.01" required>
+        </label>
+        <label class="form__label"><input class="form__checkbox" type="checkbox" name="disponible" checked>Disponible</label>
+        <button class="btn" type="submit">Crear plato</button>
+    </form>
+{% endif %}
+
+<h3>Platos registrados</h3>
+{% for plato in platos %}
+    <article class="panel">
+        <h4>{{ plato.nombre }} (ID {{ plato.id }})</h4>
+
+        {% if current_user and 'write:carta' in current_user.permissions %}
+            <form class="form" method="post" action="{{ url_for('carta.editar_plato', plato_id=plato.id) }}">
+                <label class="form__label">Restaurante
+                    <select class="form__select" name="restaurante_id" required>
+                        {% for restaurante in restaurantes %}
+                            <option value="{{ restaurante.id }}" {% if restaurante.id == plato.restaurante_id %}selected{% endif %}>{{ restaurante.nombre }}</option>
+                        {% endfor %}
+                    </select>
+                </label>
+                <label class="form__label">Nombre
+                    <input class="form__input" name="nombre" maxlength="120" value="{{ plato.nombre }}" required>
+                </label>
+                <label class="form__label">Precio (Bs)
+                    <input class="form__input" type="number" name="precio" min="0.01" step="0.01" value="{{ plato.precio }}" required>
+                </label>
+                <label class="form__label"><input class="form__checkbox" type="checkbox" name="disponible" {% if plato.disponible %}checked{% endif %}>Disponible</label>
+                <button class="btn" type="submit">Guardar plato</button>
+            </form>
+        {% endif %}
+
+        {% if current_user and 'delete:carta' in current_user.permissions %}
+            <form class="form__actions" method="post" action="{{ url_for('carta.eliminar_plato', plato_id=plato.id) }}">
+                <button class="btn btn--danger" type="submit">Eliminar plato</button>
+            </form>
+        {% endif %}
+    </article>
+{% else %}
+    <p>No hay platos registrados.</p>
+{% endfor %}
+{% endblock %}

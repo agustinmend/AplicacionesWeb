@@ -1,41 +1,112 @@
+from decimal import Decimal
 from django.contrib import admin
-from .models import Category, Customer, Reservations, Table, Order, OrderItem, Payment, Product
-# Register your models here.
+from django.core.exceptions import ValidationError
+from django.forms.models import BaseInlineFormSet
+from .models import Restaurante, Plato, Pedido, ItemPedido
 
-@admin.register(Category)
-class CategoryAdmin(admin.ModelAdmin):
-    pass
+# RESTAURANTES
+@admin.register(Restaurante)
+class RestauranteAdmin(admin.ModelAdmin):
+    list_display = ("id", "nombre", "ciudad", "telefono")
+    list_filter = ("ciudad",)
+    search_fields = ("nombre", "ciudad")
 
-@admin.register(Customer)
-class CustomerAdmin(admin.ModelAdmin):
-    search_fields = ('first_name', 'last_name')
+# PLATOS
+@admin.register(Plato)
+class PlatoAdmin(admin.ModelAdmin):
+    list_display = (
+        "id", "nombre", "restaurante", "precio", "disponible"
+    )
+    list_filter = ("restaurante", "disponible")
+    search_fields = ("nombre",)
 
-@admin.register(Reservations)
-class ReservationAdmin(admin.ModelAdmin):
-    pass
 
-@admin.register(Table)
-class TableAdmin(admin.ModelAdmin):
-    pass
+# VALIDAR ITEMS DEL PEDIDO
+class ItemPedidoFormSet(BaseInlineFormSet):
 
-class OrderProductInline(admin.TabularInline):
-    model = OrderItem
+    def clean(self):
+        super().clean()
 
-@admin.register(Order)
-class OrderAdmin(admin.ModelAdmin):
-    inlines = (OrderProductInline,)
-    list_display = ('table', 'customer', 'status', 'total_amount', 'created')
-    list_filter = ('status',)
-    search_fields = ('table__table_number', 'customer__first_name', 'customer__last_name')
+        if any(self.errors):
+            return
 
-@admin.register(OrderItem)
-class OrderItemAdmin(admin.ModelAdmin):
-    pass
+        for form in self.forms:
+            data = form.cleaned_data
 
-@admin.register(Payment)
-class PaymentAdmin(admin.ModelAdmin):
-    pass
+            if not data or data.get("DELETE"):
+                continue
 
-@admin.register(Product)
-class ProductAdmin(admin.ModelAdmin):
-    pass
+            plato = data.get("plato")
+
+            if plato and plato.restaurante_id != self.instance.restaurante_id:
+                raise ValidationError(
+                    "El plato no pertenece al restaurante del pedido."
+                )
+
+
+# MOSTRAR ITEMS DENTRO DEL PEDIDO
+class ItemPedidoInline(admin.TabularInline):
+    model = ItemPedido
+    formset = ItemPedidoFormSet
+
+    fields = ("plato", "cantidad", "precio_unitario")
+    readonly_fields = ("precio_unitario",)
+
+    extra = 1
+    min_num = 1
+    validate_min = True
+
+
+# ADMINISTRAR PEDIDOS
+@admin.register(Pedido)
+class PedidoAdmin(admin.ModelAdmin):
+    list_display = (
+        "id", "cliente", "restaurante",
+        "estado", "fecha", "total"
+    )
+
+    list_filter = ("estado", "restaurante")
+    search_fields = ("cliente",)
+
+    readonly_fields = ("total", "fecha")
+    inlines = (ItemPedidoInline,)
+
+    # Solo el superusuario puede corregir estados
+    def get_readonly_fields(self, request, obj=None):
+        if request.user.is_superuser:
+            return ("total", "fecha")
+
+        return ("total", "fecha", "estado")
+
+    # Copiar el precio actual al agregar un item
+    def save_formset(self, request, form, formset, change):
+        items = formset.save(commit=False)
+
+        for item in formset.deleted_objects:
+            item.delete()
+
+        for item in items:
+            if item.pk is None:
+                item.precio_unitario = item.plato.precio
+            else:
+                anterior = ItemPedido.objects.get(pk=item.pk)
+
+                if anterior.plato_id != item.plato_id:
+                    item.precio_unitario = item.plato.precio
+
+            item.save()
+
+        formset.save_m2m()
+
+    # Calcular el total del pedido
+    def save_related(self, request, form, formsets, change):
+        super().save_related(request, form, formsets, change)
+
+        pedido = form.instance
+        total = Decimal("0.00")
+
+        for item in pedido.items.all():
+            total += item.cantidad * item.precio_unitario
+
+        pedido.total = total
+        pedido.save(update_fields=["total"])

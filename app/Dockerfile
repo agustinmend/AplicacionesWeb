@@ -1,7 +1,7 @@
 FROM python:3.12.7
-WORKDIR /app
+WORKDIR /proyecto
 COPY requirements.txt .
 RUN pip install --default-timeout=300 --no-cache-dir -r requirements.txt
-COPY . .
+COPY . ./app
 EXPOSE 5000
-CMD ["gunicorn", "-c", "gunicorn.conf.py", "wsgi:app"]
+CMD ["gunicorn", "-c", "app/gunicorn.conf.py", "app.wsgi:app"]

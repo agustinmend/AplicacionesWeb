@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+{% block title %}Pedido #{{ pedido.id }}{% endblock %}
+{% block content %}
+<a href="{{ url_for('carta.mis_pedidos') }}">Volver a mis pedidos</a>
+<h2>Pedido #{{ pedido.id }}</h2>
+<p><strong>Estado:</strong> {{ pedido.estado.replace('_', ' ') }}</p>
+<table class="data-table">
+    <thead class="data-table__head">
+        <tr><th>Plato</th><th>Cantidad</th><th>Precio</th><th>Subtotal</th></tr>
+    </thead>
+    <tbody>
+        {% for item in items %}
+        <tr>
+            <td>#{{ item.plato_id }}</td>
+            <td>{{ item.cantidad }}</td>
+            <td>Bs {{ '%.2f'|format(item.precio_unitario) }}</td>
+            <td>Bs {{ '%.2f'|format(item.precio_unitario * item.cantidad) }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+<p><strong>Total: Bs {{ '%.2f'|format(pedido.total) }}</strong></p>
+
+{% if current_user and 'read:mis-pedidos' in current_user.permissions and pedido.estado == 'pendiente' %}
+    <form method="post" action="{{ url_for('carta.cancelar_pedido', pedido_id=pedido.id) }}">
+        <button class="btn btn--danger" type="submit">Cancelar pedido</button>
+    </form>
+{% endif %}
+{% endblock %}
