@@ -14,7 +14,7 @@ def create_app(config_class=Config):
     
     db.init_app(app)
 
-    from . import models  # noqa: F401  (registers the tables for migrations)
+    from . import models
     from .auth import AuthError, current_user
     from .auth.handlers import handle_auth_error
     from .auth.oauth import init_auth0
@@ -24,7 +24,6 @@ def create_app(config_class=Config):
     from .api import bp as api_bp
     
     init_auth0(app)
-    # One key client per app, so its cache lives as long as the process.
     app.extensions["auth0_jwks"] = jwks_client(app.config["AUTH0_DOMAIN"])
     
     app.register_blueprint(main_bp)
@@ -35,8 +34,6 @@ def create_app(config_class=Config):
 
     @app.context_processor
     def inject_current_user():
-        # For the navbar and to hide buttons the user cannot use. Hiding is
-        # UX only: the decorator on each route is what protects it.
         return {"current_user": current_user()}
     
     return app

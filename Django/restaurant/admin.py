@@ -4,14 +4,12 @@ from django.core.exceptions import ValidationError
 from django.forms.models import BaseInlineFormSet
 from .models import Restaurante, Plato, Pedido, ItemPedido
 
-# RESTAURANTES
 @admin.register(Restaurante)
 class RestauranteAdmin(admin.ModelAdmin):
     list_display = ("id", "nombre", "ciudad", "telefono")
     list_filter = ("ciudad",)
     search_fields = ("nombre", "ciudad")
 
-# PLATOS
 @admin.register(Plato)
 class PlatoAdmin(admin.ModelAdmin):
     list_display = (
@@ -20,8 +18,6 @@ class PlatoAdmin(admin.ModelAdmin):
     list_filter = ("restaurante", "disponible")
     search_fields = ("nombre",)
 
-
-# VALIDAR ITEMS DEL PEDIDO
 class ItemPedidoFormSet(BaseInlineFormSet):
 
     def clean(self):
@@ -43,8 +39,6 @@ class ItemPedidoFormSet(BaseInlineFormSet):
                     "El plato no pertenece al restaurante del pedido."
                 )
 
-
-# MOSTRAR ITEMS DENTRO DEL PEDIDO
 class ItemPedidoInline(admin.TabularInline):
     model = ItemPedido
     formset = ItemPedidoFormSet
@@ -56,8 +50,6 @@ class ItemPedidoInline(admin.TabularInline):
     min_num = 1
     validate_min = True
 
-
-# ADMINISTRAR PEDIDOS
 @admin.register(Pedido)
 class PedidoAdmin(admin.ModelAdmin):
     list_display = (
@@ -71,14 +63,12 @@ class PedidoAdmin(admin.ModelAdmin):
     readonly_fields = ("total", "fecha")
     inlines = (ItemPedidoInline,)
 
-    # Solo el superusuario puede corregir estados
     def get_readonly_fields(self, request, obj=None):
         if request.user.is_superuser:
             return ("total", "fecha")
 
         return ("total", "fecha", "estado")
 
-    # Copiar el precio actual al agregar un item
     def save_formset(self, request, form, formset, change):
         items = formset.save(commit=False)
 
@@ -98,7 +88,6 @@ class PedidoAdmin(admin.ModelAdmin):
 
         formset.save_m2m()
 
-    # Calcular el total del pedido
     def save_related(self, request, form, formsets, change):
         super().save_related(request, form, formsets, change)
 

@@ -1,7 +1,6 @@
 from datetime import datetime, timezone
 from .extensions import db
 
-# RESTAURANTE
 class Restaurante(db.Model):
     __tablename__ = "restaurantes"
     __table_args__ = {"schema": "content"}
@@ -24,7 +23,6 @@ class Restaurante(db.Model):
             "telefono": self.telefono
         }
 
-# PLATO
 class Plato(db.Model):
     __tablename__ = "platos"
     __table_args__ = {"schema": "content"}
@@ -52,7 +50,6 @@ class Plato(db.Model):
             "restaurante_id": self.restaurante_id
         }
 
-# PEDIDO
 class Pedido(db.Model):
     __tablename__ = "pedidos"
     __table_args__ = {"schema": "content"}
@@ -65,7 +62,6 @@ class Pedido(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
 
-    # Identificador sub de Auth0
     cliente = db.Column(db.String(255), nullable=False, index=True)
 
     restaurante_id = db.Column(
@@ -101,8 +97,6 @@ class Pedido(db.Model):
             "total": str(self.total),
             "items": [item.format() for item in self.items]
         }
-
-# ITEM PEDIDO
 
 class ItemPedido(db.Model):
     __tablename__ = "items_pedido"

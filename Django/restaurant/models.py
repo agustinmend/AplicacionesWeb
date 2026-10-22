@@ -2,7 +2,6 @@ from decimal import Decimal
 from django.db import models
 from django.core.validators import MinValueValidator, MaxValueValidator
 
-# RESTAURANTE
 class Restaurante(models.Model):
     id = models.AutoField(primary_key=True)
     nombre = models.CharField(max_length=120)
@@ -17,8 +16,6 @@ class Restaurante(models.Model):
 
     def __str__(self):
         return self.nombre
-
-# PLATO
 class Plato(models.Model):
     id = models.AutoField(primary_key=True)
     nombre = models.CharField(max_length=120)
@@ -36,7 +33,6 @@ class Plato(models.Model):
         on_delete=models.CASCADE,
         related_name="platos"
     )
-
     class Meta:
         db_table = "content\".\"platos"
         verbose_name = "Plato"
@@ -52,8 +48,6 @@ class Plato(models.Model):
     def __str__(self):
         return self.nombre
 
-
-# PEDIDO
 class Pedido(models.Model):
     class Estado(models.TextChoices):
         PENDIENTE = "pendiente", "Pendiente"
@@ -110,9 +104,6 @@ class Pedido(models.Model):
 
     def __str__(self):
         return f"Pedido {self.id} - {self.estado}"
-
-
-# ITEM PEDIDO
 
 class ItemPedido(models.Model):
     id = models.AutoField(primary_key=True)

@@ -9,7 +9,6 @@ from .models import Restaurante, Plato, Pedido, ItemPedido
 
 bp = Blueprint("carta", __name__)
 
-# CARTA PUBLICA
 @bp.get("/")
 def index():
     ciudad = request.args.get("ciudad", "").strip()
@@ -19,12 +18,10 @@ def index():
     restaurantes = consulta.order_by(Restaurante.nombre).all()
     return render_template("index.html", restaurantes=restaurantes)
 
-
 @bp.get("/restaurantes/<int:restaurante_id>")
 def restaurante(restaurante_id):
     lugar = db.get_or_404(Restaurante, restaurante_id)
     return render_template("restaurantes/detalle.html", restaurante=lugar)
-
 
 @bp.get("/restaurantes/<int:restaurante_id>/platos")
 def platos(restaurante_id):
@@ -34,7 +31,6 @@ def platos(restaurante_id):
     ).order_by(Plato.nombre).all()
     return render_template("platos/platos.html", restaurante=restaurante, platos=platos)
 
-
 @bp.get("/platos/<int:plato_id>")
 def detalle_plato(plato_id):
     plato = db.get_or_404(Plato, plato_id)
@@ -42,8 +38,6 @@ def detalle_plato(plato_id):
         abort(404)
     return render_template("platos/detalle.html", plato=plato)
 
-
-# CLIENTE: PEDIDO DE VARIOS PLATOS POR HTML SIN JAVASCRIPT
 @bp.post("/pedidos/crear")
 @requires_auth("create:pedidos")
 def crear_pedido(payload):
@@ -84,7 +78,7 @@ def crear_pedido(payload):
 
     platos = Plato.query.filter(Plato.id.in_(seleccion.keys())).with_for_update().all()
     if len(platos) != len(seleccion):
-        abort(400, "Uno de los platos no existe.")
+        abort(404, "Uno de los platos no existe.")
 
     total = Decimal("0.00")
     detalles = []
@@ -119,7 +113,6 @@ def crear_pedido(payload):
     flash("Pedido creado correctamente.", "success")
     return redirect(url_for("carta.detalle_pedido", pedido_id=pedido.id), code=303)
 
-# CLIENTE: SUS PEDIDOS
 @bp.get("/mis-pedidos")
 @requires_auth("read:mis-pedidos")
 def mis_pedidos(payload):
@@ -140,7 +133,6 @@ def mis_pedidos(payload):
         items_por_pedido=items_por_pedido
     )
 
-
 @bp.get("/pedidos/<int:pedido_id>")
 @requires_auth("read:mis-pedidos")
 def detalle_pedido(payload, pedido_id):
@@ -149,7 +141,6 @@ def detalle_pedido(payload, pedido_id):
         abort(404)
     items = ItemPedido.query.filter_by(pedido_id=pedido.id).all()
     return render_template("pedidos/detalle.html", pedido=pedido, items=items)
-
 
 @bp.post("/mis-pedidos/<int:pedido_id>/cancelar")
 @requires_auth("read:mis-pedidos")
@@ -172,8 +163,6 @@ def cancelar_pedido(payload, pedido_id):
     flash("Pedido cancelado.", "success")
     return redirect(url_for("carta.detalle_pedido", pedido_id=pedido.id), code=303)
 
-
-# COCINA
 @bp.get("/cocina")
 @requires_auth("read:pedidos")
 def cocina(payload):
@@ -191,7 +180,6 @@ def cocina(payload):
         "cocina/cola.html", pedidos=pedidos,
         items_por_pedido=items_por_pedido
     )
-
 
 @bp.post("/cocina/<int:pedido_id>/avanzar")
 @requires_auth("update:pedidos")
@@ -219,15 +207,12 @@ def avanzar_pedido(payload, pedido_id):
     flash("Estado actualizado.", "success")
     return redirect(url_for("carta.cocina"), code=303)
 
-
-# ADMINISTRADOR: FORMULARIOS DE CARTA
 @bp.get("/administracion")
 @requires_auth("write:carta")
 def administracion(payload):
     restaurantes = Restaurante.query.order_by(Restaurante.id).all()
     platos = Plato.query.order_by(Plato.id).all()
     return render_template("admin/carta.html", restaurantes=restaurantes, platos=platos)
-
 
 @bp.post("/administracion/restaurantes/crear")
 @requires_auth("write:carta")
@@ -246,7 +231,6 @@ def crear_restaurante(payload):
         abort(500)
     flash("Restaurante creado.", "success")
     return redirect(url_for("carta.administracion"), code=303)
-
 
 @bp.post("/administracion/restaurantes/<int:restaurante_id>/editar")
 @requires_auth("write:carta")
@@ -269,7 +253,6 @@ def editar_restaurante(payload, restaurante_id):
         abort(500)
     flash("Restaurante actualizado.", "success")
     return redirect(url_for("carta.administracion"), code=303)
-
 
 @bp.post("/administracion/restaurantes/<int:restaurante_id>/eliminar")
 @requires_auth("delete:carta")
@@ -298,7 +281,6 @@ def eliminar_restaurante(payload, restaurante_id):
     flash("Restaurante eliminado junto con sus registros asociados.", "success")
     return redirect(url_for("carta.administracion"), code=303)
 
-
 @bp.post("/administracion/platos/crear")
 @requires_auth("write:carta")
 def crear_plato(payload):
@@ -322,7 +304,6 @@ def crear_plato(payload):
         abort(500)
     flash("Plato creado.", "success")
     return redirect(url_for("carta.administracion"), code=303)
-
 
 @bp.post("/administracion/platos/<int:plato_id>/editar")
 @requires_auth("write:carta")
@@ -352,7 +333,6 @@ def editar_plato(payload, plato_id):
         abort(500)
     flash("Plato actualizado (sin modificar precios historicos).", "success")
     return redirect(url_for("carta.administracion"), code=303)
-
 
 @bp.post("/administracion/platos/<int:plato_id>/eliminar")
 @requires_auth("delete:carta")
