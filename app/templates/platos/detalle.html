@@ -1,0 +1,11 @@
+{% extends 'base.html' %}
+{% block title %}{{ plato.nombre }}{% endblock %}
+{% block content %}
+<a href="{{ url_for('carta.platos', restaurante_id=plato.restaurante_id) }}">← Volver a la carta</a>
+<article class="dish-card">
+    <div class="dish-card__info">
+        <h2>{{ plato.nombre }}</h2>
+        <p><strong>Precio:</strong> Bs {{ '%.2f'|format(plato.precio) }}</p>
+    </div>
+</article>
+{% endblock %}

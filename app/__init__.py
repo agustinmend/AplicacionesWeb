@@ -1,28 +1,39 @@
 from flask import Flask
+from werkzeug.middleware.proxy_fix import ProxyFix
 from .config import Config
-from .extensions import db, migrate
+from .extensions import db
 
 def create_app(config_class=Config):
     app = Flask(__name__)
     app.config.from_object(config_class)
-    
-    if len(app.config["JWT_SECRET_KEY"].encode()) < 32:
-        raise RuntimeError("JWT_SECRET_KEY must be at least 32 bytes long.")
+    for key in ("AUTH0_DOMAIN", "AUTH0_AUDIENCE", "AUTH0_CLIENT_ID", "AUTH0_CLIENT_SECRET"):
+        if not app.config[key]:
+            raise RuntimeError(f"{key} is not set. Copy .env.example to .env and fill in your Auth0 values.")
+    if app.config["BEHIND_PROXY"]:
+        app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1)
     
     db.init_app(app)
-    migrate.init_app(app, db)
-    
-    from . import models  # noqa: F401  (registers the tables for migrations)
-    from .api import bp as api_bp
-    from .auth.errors import AuthError
+
+    from . import models
+    from .auth import AuthError, current_user
     from .auth.handlers import handle_auth_error
+    from .auth.oauth import init_auth0
     from .auth.routes import bp as auth_bp
-    from .routes import bp as todos_bp
+    from .auth.tokens import jwks_client
+    from .routes import bp as main_bp
+    from .api import bp as api_bp
     
-    app.register_blueprint(todos_bp)
+    init_auth0(app)
+    app.extensions["auth0_jwks"] = jwks_client(app.config["AUTH0_DOMAIN"])
+    
+    app.register_blueprint(main_bp)
     app.register_blueprint(auth_bp)
     app.register_blueprint(api_bp)
-
+    
     app.register_error_handler(AuthError, handle_auth_error)
+
+    @app.context_processor
+    def inject_current_user():
+        return {"current_user": current_user()}
     
     return app

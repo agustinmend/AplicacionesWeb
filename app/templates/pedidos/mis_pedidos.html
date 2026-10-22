@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+{% block title %}Mis pedidos{% endblock %}
+{% block content %}
+<h2>Mis pedidos</h2>
+{% for pedido in pedidos %}
+    <article class="order-card">
+        <h3 class="order-card__title">Pedido #{{ pedido.id }}</h3>
+        <p>Estado: {{ pedido.estado|replace('_', ' ') }}</p>
+        <p>Total: Bs {{ '%.2f'|format(pedido.total) }}</p>
+        <ul class="order-card__items">
+            {% for item in items_por_pedido[pedido.id] %}
+                <li>Plato #{{ item.plato_id }} · {{ item.cantidad }} × Bs {{ '%.2f'|format(item.precio_unitario) }}</li>
+            {% endfor %}
+        </ul>
+        <a class="btn btn--light" href="{{ url_for('carta.detalle_pedido', pedido_id=pedido.id) }}">Ver detalle</a>
+        {% if current_user and 'read:mis-pedidos' in current_user.permissions and pedido.estado == 'pendiente' %}
+            <form class="form__actions" method="post" action="{{ url_for('carta.cancelar_pedido', pedido_id=pedido.id) }}">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+                <button class="btn btn--danger" type="submit">Cancelar pedido</button>
+            </form>
+        {% endif %}
+    </article>
+{% else %}
+    <p>No tienes pedidos registrados.</p>
+    <a href="{{ url_for('carta.index') }}">Ver restaurantes</a>
+{% endfor %}
+{% endblock %}

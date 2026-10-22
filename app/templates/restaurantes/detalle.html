@@ -1,0 +1,12 @@
+{% extends 'base.html' %}
+{% block title %}{{ restaurante.nombre }}{% endblock %}
+{% block content %}
+<a href="{{ url_for('carta.index') }}">← Volver</a>
+<section class="restaurant-card">
+    <h2 class="restaurant-card__title">{{ restaurante.nombre }}</h2>
+    <p><strong>Ciudad:</strong> {{ restaurante.ciudad }}</p>
+    {% if restaurante.direccion %}<p><strong>Dirección:</strong> {{ restaurante.direccion }}</p>{% endif %}
+    {% if restaurante.telefono %}<p><strong>Teléfono:</strong> {{ restaurante.telefono }}</p>{% endif %}
+    <a class="btn" href="{{ url_for('carta.platos', restaurante_id=restaurante.id) }}">Ver platos disponibles</a>
+</section>
+{% endblock %}

@@ -1,11 +1,49 @@
-{% extends "layout.html" %}
+{% extends 'base.html' %}
+{% block title %}Carta de {{ restaurante.nombre }}{% endblock %}
+{% block content %}
+<a href="{{ url_for('carta.restaurante', restaurante_id=restaurante.id) }}">Volver a restaurantes</a>
+<h2>{{ restaurante.nombre }}</h2>
+<p>{{ restaurante.ciudad }}{% if restaurante.direccion %} - {{ restaurante.direccion }}{% endif %}</p>
+{% if restaurante.telefono %}<p>Teléfono: {{ restaurante.telefono }}</p>{% endif %}
+<h3>Platos disponibles</h3>
 
-{% block titulo %}
-<h1>Platos para todos</h1>
-{% endblock %}
-
-
-{% block contenido %}
-    <h2>{{plato.nombre}}</h2>
-    <p>{{plato.descripcion}}</p>
+{% if current_user and 'create:pedidos' in current_user.permissions %}
+    <p>Selecciona la cantidad de cada plato. Coloca 0 si no lo deseas.</p>
+    <form method="post" action="{{ url_for('carta.crear_pedido') }}" class="form">
+        <input type="hidden" name="restaurante_id" value="{{ restaurante.id }}">
+        {% for plato in platos %}
+            <div class="dish-card">
+                <div class="dish-card__info">
+                    <strong>{{ plato.nombre }}</strong>
+                    <a href="{{ url_for('carta.detalle_plato', plato_id=plato.id) }}">Detalle</a>
+                    <p>Bs {{ '%.2f'|format(plato.precio) }}</p>
+                </div>
+                <input type="hidden" name="plato_id" value="{{ plato.id }}">
+                <label class="form__label">Cantidad
+                    <input class="form__input form__input--small" type="number" name="cantidad" min="0" max="20" value="0" required>
+                </label>
+            </div>
+        {% else %}
+            <p>No hay platos disponibles.</p>
+        {% endfor %}
+        {% if platos %}<button class="btn" type="submit">Hacer pedido</button>{% endif %}
+    </form>
+{% else %}
+    <div class="restaurant-list">
+        {% for plato in platos %}
+            <article class="dish-card">
+                <div class="dish-card__info">
+                    <strong>{{ plato.nombre }}</strong>
+                    <a href="{{ url_for('carta.detalle_plato', plato_id=plato.id) }}">Detalle</a>
+                    <p>Bs {{ '%.2f'|format(plato.precio) }}</p>
+                </div>
+            </article>
+        {% else %}
+            <p>No hay platos disponibles.</p>
+        {% endfor %}
+    </div>
+    {% if not current_user %}
+        <p><a href="{{ url_for('auth.login', next=request.path) }}">Inicia sesión</a> para hacer un pedido.</p>
+    {% endif %}
+{% endif %}
 {% endblock %}

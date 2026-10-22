@@ -8,27 +8,28 @@ services:
       POSTGRES_PASSWORD: ${DB_PASSWORD}
     volumes:
       - datos_pg:/var/lib/postgresql/data
-      - ./db/initdb:/docker-entrypoint-initdb.d:ro
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_NAME}"]
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
       interval: 5s
       timeout: 5s
       retries: 10
     restart: unless-stopped
 
-  web:
-    build: ./app
+  migrate:
+    build: ./Django
+    entrypoint: ["python", "manage.py", "migrate", "--noinput"]
     environment:
-      DATABASE_URL: postgresql://${DB_USER}:${DB_PASSWORD}@db:5432/${DB_NAME}
-      SECRET_KEY: ${APP_SECRET_KEY}
-      JWT_SECRET_KEY: ${JWT_SECRET_KEY}
-      JWT_EXPIRES_MINUTES: ${JWT_EXPIRES_MINUTES}
-      JWT_ISSUER: ${JWT_ISSUER}
-    volumes:
-      - ./app:/app
+      DB_NAME: ${DB_NAME}
+      DB_USER: ${DB_USER}
+      DB_PASSWORD: ${DB_PASSWORD}
+      DB_HOST: db
+      DB_PORT: 5432
+      DJANGO_SECRET_KEY: ${DJANGO_SECRET_KEY}
+      DEBUG: ${DEBUG}
     depends_on:
       db:
         condition: service_healthy
+    restart: "no"
 
   django:
     build: ./Django
@@ -36,17 +37,34 @@ services:
       DB_NAME: ${DB_NAME}
       DB_USER: ${DB_USER}
       DB_PASSWORD: ${DB_PASSWORD}
-      DB_HOST: ${DB_HOST}
-      DB_PORT: ${DB_PORT}
+      DB_HOST: db
+      DB_PORT: 5432
       DJANGO_SECRET_KEY: ${DJANGO_SECRET_KEY}
       DEBUG: ${DEBUG}
       DJANGO_SUPERUSER_USERNAME: ${DJANGO_SUPERUSER_USERNAME}
       DJANGO_SUPERUSER_EMAIL: ${DJANGO_SUPERUSER_EMAIL}
       DJANGO_SUPERUSER_PASSWORD: ${DJANGO_SUPERUSER_PASSWORD}
     depends_on:
-      db:
-        condition: service_healthy
-  
+      migrate:
+        condition: service_completed_successfully
+    restart: unless-stopped
+
+  flask:
+    build: ./app
+    environment:
+      DATABASE_URL: postgresql://${DB_USER}:${DB_PASSWORD}@db:5432/${DB_NAME}
+      SECRET_KEY: ${APP_SECRET_KEY}
+      AUTH0_DOMAIN: ${AUTH0_DOMAIN:?Set AUTH0_DOMAIN in .env}
+      AUTH0_AUDIENCE: ${AUTH0_AUDIENCE:?Set AUTH0_AUDIENCE in .env}
+      AUTH0_CLIENT_ID: ${AUTH0_CLIENT_ID:?Set AUTH0_CLIENT_ID in .env}
+      AUTH0_CLIENT_SECRET: ${AUTH0_CLIENT_SECRET:?Set AUTH0_CLIENT_SECRET in .env}
+    volumes:
+      - ./app:/proyecto/app
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+    restart: unless-stopped
+
   nginx:
     image: nginx:alpine
     ports:
@@ -55,8 +73,9 @@ services:
       - ./nginx/nginx.conf:/etc/nginx/conf.d/default.conf:ro
       - ./app/static:/app/static:ro
     depends_on:
-      - web
+      - flask
       - django
     restart: unless-stopped
+
 volumes:
   datos_pg:

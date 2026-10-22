@@ -37,7 +37,21 @@ SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.environ.get('DEBUG', False)=='True'
 
-ALLOWED_HOSTS = ['localhost','127.0.0.1', 'django']
+ALLOWED_HOSTS = [
+    "localhost",
+    "127.0.0.1",
+    "django",
+    "admin.jamu2-app.duckdns.org",
+]
+
+CSRF_TRUSTED_ORIGINS = [
+    "https://admin.jamu2-app.duckdns.org",
+]
+
+SECURE_PROXY_SSL_HEADER = (
+    "HTTP_X_FORWARDED_PROTO",
+    "https",
+)
 
 ROOT_URLCONF = 'config.urls'
 
@@ -58,7 +72,7 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
 
-STATIC_URL = 'static/'
+STATIC_URL = "/static/"
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 STORAGES = {
     "staticfiles": {

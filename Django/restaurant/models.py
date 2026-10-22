@@ -1,147 +1,152 @@
+from decimal import Decimal
 from django.db import models
-import uuid
-from django.db import models
-from django.core.validators import MinValueValidator
-from django.utils.translation import gettext_lazy as _
-# Create your models here.
+from django.core.validators import MinValueValidator, MaxValueValidator
 
-class TimeStampedMixin(models.Model):
-    created = models.DateTimeField(auto_now_add=True)
-    modified = models.DateTimeField(auto_now=True)
-
-    class Meta:
-         abstract = True
-
-class UUIDMixin(models.Model):
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+class Restaurante(models.Model):
+    id = models.AutoField(primary_key=True)
+    nombre = models.CharField(max_length=120)
+    ciudad = models.CharField(max_length=80)
+    direccion = models.CharField(max_length=200, blank=True)
+    telefono = models.CharField(max_length=30, blank=True)
 
     class Meta:
-         abstract = True
-
-class Category(UUIDMixin, TimeStampedMixin):
-    name = models.CharField(_('name'), max_length=100)
-    description = models.TextField(_('description'), blank=True)
-    class Meta:
-        db_table = "content\".\"categories"
-        verbose_name = 'Categoria'
-        verbose_name_plural = 'Categorias'
+        db_table = "content\".\"restaurantes"
+        verbose_name = "Restaurante"
+        verbose_name_plural = "Restaurantes"
 
     def __str__(self):
-        return self.name
+        return self.nombre
+class Plato(models.Model):
+    id = models.AutoField(primary_key=True)
+    nombre = models.CharField(max_length=120)
 
-class Customer(UUIDMixin, TimeStampedMixin):
-    first_name = models.CharField(_('first_name'), max_length=100)
-    last_name = models.CharField(_('last_name'), max_length=100)
-    email = models.CharField(_('email'), max_length=150, unique=True)
-    phone = models.CharField(_('phone'), max_length=20)
+    precio = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        validators=[MinValueValidator(Decimal("0.01"))]
+    )
 
+    disponible = models.BooleanField(default=True)
+
+    restaurante = models.ForeignKey(
+        Restaurante,
+        on_delete=models.CASCADE,
+        related_name="platos"
+    )
     class Meta:
-        db_table = "content\".\"customers"
-        verbose_name = 'Cliente'
-        verbose_name_plural = 'Clientes'
+        db_table = "content\".\"platos"
+        verbose_name = "Plato"
+        verbose_name_plural = "Platos"
+
+        constraints = [
+            models.CheckConstraint(
+                check=models.Q(precio__gt=0),
+                name="plato_precio_positivo"
+            )
+        ]
+
     def __str__(self):
-            return self.first_name + self.last_name
+        return self.nombre
+
+class Pedido(models.Model):
+    class Estado(models.TextChoices):
+        PENDIENTE = "pendiente", "Pendiente"
+        EN_PREPARACION = "en_preparacion", "En preparación"
+        LISTO = "listo", "Listo"
+        ENTREGADO = "entregado", "Entregado"
+        CANCELADO = "cancelado", "Cancelado"
+
+    id = models.AutoField(primary_key=True)
+    cliente = models.CharField(max_length=255, db_index=True)
     
-    
+    restaurante = models.ForeignKey(
+        Restaurante,
+        on_delete=models.CASCADE,
+        related_name="pedidos"
+    )
 
-class Table(UUIDMixin, TimeStampedMixin):
-    table_number = models.IntegerField(_('table number'), unique=True)
-    capacity = models.IntegerField(_('capacity'), validators=[MinValueValidator(1)])
-    is_active = models.BooleanField(_('is_Active'))
+    estado = models.CharField(
+        max_length=20,
+        choices=Estado.choices,
+        default=Estado.PENDIENTE
+    )
+
+    fecha = models.DateTimeField(auto_now_add=True)
+
+    total = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        default=Decimal("0.00"),
+        validators=[MinValueValidator(Decimal("0.00"))]
+    )
 
     class Meta:
-        db_table = "content\".\"tables"
-        verbose_name = 'mesa'
-        verbose_name_plural = 'mesas'
+        db_table = "content\".\"pedidos"
+        verbose_name = "Pedido"
+        verbose_name_plural = "Pedidos"
+
+        constraints = [
+            models.CheckConstraint(
+                check=models.Q(estado__in=[
+                    "pendiente",
+                    "en_preparacion",
+                    "listo",
+                    "entregado",
+                    "cancelado"
+                ]),
+                name="pedido_estado_valido"
+            ),
+            models.CheckConstraint(
+                check=models.Q(total__gte=0),
+                name="pedido_total_no_negativo"
+            )
+        ]
 
     def __str__(self):
-            return str(self.table_number)
+        return f"Pedido {self.id} - {self.estado}"
 
-class Reservations(UUIDMixin, TimeStampedMixin):
-    class Status(models.TextChoices):
-        PENDING = 'PENDING'
-        CONFIRMED = 'CONFIRMED'
-        CANCELLED = 'CANCELLED'
-        COMPLETED = 'COMPLETED'
+class ItemPedido(models.Model):
+    id = models.AutoField(primary_key=True)
 
-    customer = models.ForeignKey(Customer, on_delete=models.CASCADE)
-    table = models.ForeignKey(Table, on_delete=models.PROTECT)
-    reservation_time = models.DateTimeField(_('reservation_time'))
-    status = models.CharField(max_length=20, choices=Status.choices, default=Status.PENDING)
+    pedido = models.ForeignKey(
+        Pedido,
+        on_delete=models.CASCADE,
+        related_name="items"
+    )
+
+    plato = models.ForeignKey(
+        Plato,
+        on_delete=models.CASCADE
+    )
+
+    cantidad = models.IntegerField(
+        validators=[
+            MinValueValidator(1),
+            MaxValueValidator(20)
+        ]
+    )
+
+    precio_unitario = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        validators=[MinValueValidator(Decimal("0.00"))]
+    )
 
     class Meta:
-        db_table = "content\".\"reservations"
-        verbose_name = 'reservacion'
-        verbose_name_plural = 'reservaciones'
+        db_table = "content\".\"items_pedido"
+        verbose_name = "Ítem de pedido"
+        verbose_name_plural = "Ítems de pedidos"
+
+        constraints = [
+            models.CheckConstraint(
+                check=models.Q(cantidad__gte=1, cantidad__lte=20),
+                name="item_cantidad_valida"
+            ),
+            models.CheckConstraint(
+                check=models.Q(precio_unitario__gte=0),
+                name="item_precio_no_negativo"
+            )
+        ]
 
     def __str__(self):
-            return "reservacion: " + self.customer.first_name
-
-class Product(UUIDMixin, TimeStampedMixin):
-    category = models.ForeignKey(Category, on_delete=models.PROTECT)
-    name = models.CharField(_('name'), max_length=150)
-    description = models.TextField(_('description'), blank=True)
-    current_price = models.DecimalField(_('currrent price'), max_digits=10, decimal_places=2, validators=[MinValueValidator(0)])
-    is_available = models.BooleanField(_('is Available'))
-
-    class Meta:
-        db_table = "content\".\"products"
-        verbose_name = 'producto'
-        verbose_name_plural = 'productos'
-
-    def __str__(self):
-            return self.name
-
-class Order(UUIDMixin, TimeStampedMixin):
-    class Status(models.TextChoices):
-        IN_PROGRESS = 'IN_PROGRESS'
-        SERVED = 'SERVED'
-        BILLED = 'BILLED'
-        CANCELLED = 'CANCELLED'
-
-    table = models.ForeignKey(Table, on_delete=models.PROTECT)
-    customer = models.ForeignKey(Customer, on_delete=models.PROTECT, null=True, blank=True)
-    status = models.CharField(max_length=30, choices=Status.choices, default=Status.IN_PROGRESS)
-    total_amount = models.DecimalField(_('total amount'), max_digits=10, decimal_places=2, validators=[MinValueValidator(0.1)])
-    products = models.ManyToManyField(Product, through='OrderItem')
-
-    class Meta:
-        db_table = "content\".\"orders"
-        verbose_name = 'orden'
-        verbose_name_plural = 'ordenes'
-
-    def __str__(self):
-            return str(self.id)
-
-class OrderItem(UUIDMixin, TimeStampedMixin):
-    order = models.ForeignKey(Order, on_delete=models.CASCADE)
-    product = models.ForeignKey(Product, on_delete=models.PROTECT)
-    quantity = models.IntegerField(_('quantity'), validators=[MinValueValidator(1)])
-    unit_price = models.DecimalField(_('unit price'), max_digits=10, decimal_places=2)
-
-    class Meta:
-        db_table = "content\".\"order_items"
-        verbose_name = 'detalle orden'
-        verbose_name_plural = 'detalles ordenes'
-
-class Payment(UUIDMixin, TimeStampedMixin):
-    class PaymentMethod(models.TextChoices):
-        CASH = 'CASH'
-        CREDIT_CARD = 'CREDIT_CARD'
-        QR = 'QR'
-        OTHER = 'OTHER'
-
-    class Status(models.TextChoices):
-        PENDING = 'PENDING'
-        COMPLETED = 'COMPLETED'
-        FAILED = 'FAILED'
-
-    order = models.ForeignKey(Order, on_delete=models.PROTECT)
-    amount = models.DecimalField(_('amount'), max_digits=10, decimal_places=2)
-    payment_method = models.CharField(_('payment method'), max_length=50, choices=PaymentMethod.choices)
-    status = models.CharField(_('status'), max_length=30, choices=Status.choices, default=Status.PENDING)
-
-    class Meta:
-            db_table = "content\".\"payments"
-            verbose_name = 'pago'
-            verbose_name_plural = 'pagos'
+        return f"{self.cantidad} x {self.plato.nombre}"

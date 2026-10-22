@@ -1,85 +1,25 @@
-
-{% extends "layout.html" %}
-
-{% block title %}Restaurante{% endblock %}
-
+{% extends 'base.html' %}
+{% block title %}Restaurantes{% endblock %}
 {% block content %}
+<h2>Restaurantes</h2>
+<p>Consulta los restaurantes sin iniciar sesión.</p>
+<form class="form" method="get" action="{{ url_for('carta.index') }}">
+    <label class="form__label">Filtrar por ciudad
+        <input class="form__input" name="ciudad" value="{{ request.args.get('ciudad', '') }}" placeholder="Ej. Santa Cruz">
+    </label>
+    <button class="btn" type="submit">Buscar</button>
+</form>
 
-<!-- LOGIN -->
-<section id="auth-view" class="card auth-card" hidden>
-    <h2>Iniciar sesión</h2>
-
-    <form id="login-form" class="todo-form">
-        <label for="username">Usuario</label>
-        <input type="text" id="username" name="username"
-               required autocomplete="username">
-
-        <label for="password">Contraseña</label>
-        <input type="password" id="password" name="password"
-               required autocomplete="current-password">
-
-        <div class="form-actions">
-            <button type="submit" class="btn btn-primary">
-                Iniciar sesión
-            </button>
-        </div>
-    </form>
-    <button type="button" id="register" class="btn">
-        Crear cuenta
-    </button>
-</section>
-
-<!-- PANEL DEL RESTAURANTE -->
-<div id="customers-view" hidden>
-
-    <!-- REGISTRAR CLIENTE -->
-    <section class="card">
-        <h2>Registrar cliente</h2>
-
-        <form id="create-form" class="todo-form">
-            <input type="text" name="first_name"
-                   placeholder="Nombre" maxlength="100" required>
-
-            <input type="text" name="last_name"
-                   placeholder="Apellido" maxlength="100" required>
-
-            <input type="email" name="email"
-                   placeholder="Correo (opcional)" maxlength="150">
-
-            <input type="tel" name="phone"
-                   placeholder="Teléfono" maxlength="20" required>
-
-            <button type="submit" class="btn btn-primary">
-                Registrar cliente
-            </button>
-        </form>
-    </section>
-
-    <!-- LISTADO DE CLIENTES -->
-    <section class="card">
-        <h2>Clientes <span id="count" class="count"></span></h2>
-
-        <ul id="customer-list" class="todo-list"></ul>
-
-        <p id="empty" class="empty" hidden>
-            No hay clientes registrados.
-        </p>
-    </section>
-
-    <!-- LISTADO DE MESAS -->
-    <section class="card">
-        <h2>Mesas del restaurante</h2>
-
-        <ul id="table-list" class="todo-list"></ul>
-        <p id="table-empty" class="empty" hidden>
-            No hay mesas registradas.
-        </p>
-    </section>
-
+<div class="restaurant-list">
+    {% for restaurante in restaurantes %}
+        <article class="restaurant-card">
+            <h3 class="restaurant-card__title">{{ restaurante.nombre }}</h3>
+            <p>{{ restaurante.ciudad }}</p>
+            {% if restaurante.direccion %}<p>{{ restaurante.direccion }}</p>{% endif %}
+            <a class="btn" href="{{ url_for('carta.restaurante', restaurante_id=restaurante.id) }}">Ver restaurante</a>
+        </article>
+    {% else %}
+        <p>No hay restaurantes registrados.</p>
+    {% endfor %}
 </div>
-
-{% endblock %}
-
-{% block scripts %}
-<script src="{{ url_for('static', filename='js/app.js') }}"></script>
 {% endblock %}
